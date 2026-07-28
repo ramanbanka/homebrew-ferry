@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  cask:
+    # A cask can only be audited once it resolves through a tap, so the checkout is
+    # symlinked into Homebrew's tap directory rather than linted in place.
+    #
+    # arm64 runner: the cask declares `depends_on arch: :arm64`, so auditing it on an
+    # x86 runner would not reflect the platform it is installed on.
+    runs-on: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Link this checkout in as a tap
+        run: |
+          TAPS="$(brew --repository)/Library/Taps/ramanbanka"
+          mkdir -p "$TAPS"
+          ln -s "$PWD" "$TAPS/homebrew-ferry"
+
+      - name: Style
+        run: brew style ramanbanka/ferry/ferry
+
+      - name: Audit
+        # Catches the mistakes that break installs for everyone: a malformed URL, a
+        # stanza that is not valid for a cask, a missing dependency.
+        run: brew audit --cask --strict ramanbanka/ferry/ferry
