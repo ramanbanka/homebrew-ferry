@@ -41,6 +41,22 @@ cask "ferry" do
   # The tarball unpacks to a versioned directory; point at the binary inside it.
   binary "ferry-#{version}-macos-arm64/ferry"
 
+  # Clear the quarantine flag before anything tries to run the binary.
+  #
+  # macOS refuses to execute a quarantined program that is not signed with an Apple
+  # Developer ID, and kills it outright — no dialog, just SIGKILL. Homebrew does not
+  # set the flag itself, but security software on managed Macs marks every newly
+  # written file, which killed `ferry install` in postflight below and aborted the
+  # whole install. Clearing it here runs before the binary is linked or executed.
+  #
+  # Remove this once Ferry is signed and notarized; it will no longer be needed.
+  preflight do
+    system_command "/usr/bin/xattr",
+                   args:         ["-d", "com.apple.quarantine",
+                                  "#{staged_path}/ferry-#{version}-macos-arm64/ferry"],
+                   must_succeed: false
+  end
+
   # Register the background agent so phones mount automatically. This is the whole
   # point of shipping as a cask: `brew install --cask ferry` is the only command a
   # user needs to run.
