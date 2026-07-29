@@ -46,8 +46,8 @@ cask "ferry" do
   # macOS refuses to execute a quarantined program that is not signed with an Apple
   # Developer ID, and kills it outright — no dialog, just SIGKILL. Homebrew does not
   # set the flag itself, but security software on managed Macs marks every newly
-  # written file, which killed `ferry install` in postflight below and aborted the
-  # whole install. Clearing it here runs before the binary is linked or executed.
+  # written file, which killed the postflight command below and aborted the whole
+  # install. Clearing it here runs before the binary is linked or executed.
   #
   # Remove this once Ferry is signed and notarized; it will no longer be needed.
   preflight do
@@ -60,17 +60,23 @@ cask "ferry" do
   # Register the background agent so phones mount automatically. This is the whole
   # point of shipping as a cask: `brew install --cask ferry` is the only command a
   # user needs to run.
+  #
+  # `enable` registers Ferry with launchd and starts it, which is the whole setup.
   postflight do
     system_command "#{HOMEBREW_PREFIX}/bin/ferry",
-                   args:         ["install"],
+                   args:         ["enable"],
                    print_stdout: true
   end
 
   # Stop and deregister the agent before the binary disappears, otherwise launchd
   # keeps trying to run a path that no longer exists and mounts are left behind.
+  #
+  # This runs the binary that is currently installed, which during an upgrade is the
+  # older one — so a version whose CLI predates `disable` cannot be upgraded through
+  # the cask and must be uninstalled first.
   uninstall_preflight do
     system_command "#{HOMEBREW_PREFIX}/bin/ferry",
-                   args:         ["uninstall"],
+                   args:         ["disable"],
                    must_succeed: false
   end
 
@@ -90,7 +96,8 @@ cask "ferry" do
     Your phone then appears in Finder under ~/Ferry/<PhoneModel>.
 
       ferry status      # agent, mounts, connected phones
-      ferry uninstall   # stop auto-mounting
+      ferry stop        # stop until your next login
+      ferry disable     # stop, and keep it from starting at login
 
     Logs: ~/Library/Logs/ferry.log
   EOS
