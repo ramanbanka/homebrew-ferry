@@ -1,7 +1,7 @@
 # homebrew-ferry
 
-Homebrew tap for [Ferry](https://github.com/ramanbanka/ferry-releases) — mount an
-Android phone on your Mac and browse it in Finder.
+Homebrew tap for [Ferry](https://ramanbanka.github.io/ferry/) — mount an Android phone on
+your Mac and browse it in Finder, like a USB drive.
 
 ```bash
 brew tap ramanbanka/ferry
