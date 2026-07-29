@@ -1,7 +1,7 @@
 # homebrew-ferry
 
-Homebrew tap for [Ferry](https://github.com/ramanbanka/ferry) — browse your Android
-phone in Finder.
+Homebrew tap for [Ferry](https://github.com/ramanbanka/ferry-releases) — mount an
+Android phone on your Mac and browse it in Finder.
 
 ```bash
 brew tap ramanbanka/ferry
@@ -15,16 +15,16 @@ uninstalling stops it and unmounts cleanly — real commands rather than plain f
 copies. It is asked once per machine.
 
 That is all this repo is for. Homebrew requires a tap to live in a repo named
-`homebrew-<name>`, so the cask cannot sit in the Ferry repo itself.
+`homebrew-<name>`, so the cask cannot live alongside Ferry itself.
 
-**Issues and pull requests belong in [ramanbanka/ferry](https://github.com/ramanbanka/ferry)**,
+**Report issues at [ferry-releases](https://github.com/ramanbanka/ferry-releases/issues)**,
 including anything about installation — this repo only holds the packaging.
 
 ## For maintainers
 
-`Casks/ferry.rb` is partly generated. `scripts/release.sh` in the Ferry repo builds the
-release tarball and writes the version and sha256 straight into this checkout, which it
-expects at `../homebrew-ferry` (override with `TAP_DIR`). Commit what it wrote.
+`Casks/ferry.rb` is partly generated. `scripts/release.sh` in the Ferry source repo
+builds the tarball and writes the version and sha256 straight into this checkout, which
+it expects at `../homebrew-ferry` (override with `TAP_DIR`). Commit what it wrote.
 
 Never edit the version or checksum by hand. Tarballs embed timestamps, so every build
 produces a different checksum, and a stale one makes Homebrew refuse to install for

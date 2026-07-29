@@ -1,7 +1,7 @@
 # Ferry — Homebrew cask.
 #
-# Ferry itself lives at https://github.com/ramanbanka/ferry. This repo exists only
-# because Homebrew looks for taps in a repo named homebrew-<name>.
+# Binaries are published at https://github.com/ramanbanka/ferry-releases. This repo
+# exists only because Homebrew looks for taps in a repo named homebrew-<name>.
 #
 # Linting needs the cask to be resolvable through a tap — Homebrew 6.x removed
 # `brew audit <path>`. Symlink this checkout in as a tap once:
@@ -14,16 +14,16 @@
 # Edits are then picked up with no copying.
 
 cask "ferry" do
-  version "0.1.0"
+  version "0.1.1"
   # Both lines above are written by scripts/release.sh in the ferry repo. Do not
   # edit by hand: tarballs embed timestamps, so every build has a different
   # checksum, and a mismatch makes Homebrew refuse to install for everyone.
-  sha256 "98eb09d46ad509f8675e13738221a14b6760b7e1fdd3fcbb013766183888d133"
+  sha256 "41fefe40dad8ce477b44a5391e6eb30bc381b6d8567f57f322e4a9b7f182fde5"
 
-  url "https://github.com/ramanbanka/ferry/releases/download/v#{version}/ferry-#{version}-macos-arm64.tar.gz"
+  url "https://github.com/ramanbanka/ferry-releases/releases/download/v#{version}/ferry-#{version}-macos-arm64.tar.gz"
   name "Ferry"
   desc "Browse your Android phone in Finder over USB"
-  homepage "https://github.com/ramanbanka/ferry"
+  homepage "https://github.com/ramanbanka/ferry-releases"
 
   # Only arm64 builds are published today. An Intel cask would need a second
   # tarball and a sha256 per architecture.
