@@ -14,11 +14,11 @@
 # Edits are then picked up with no copying.
 
 cask "ferry" do
-  version "0.1.1"
+  version "0.2.0"
   # Both lines above are written by scripts/release.sh in the ferry repo. Do not
   # edit by hand: tarballs embed timestamps, so every build has a different
   # checksum, and a mismatch makes Homebrew refuse to install for everyone.
-  sha256 "41fefe40dad8ce477b44a5391e6eb30bc381b6d8567f57f322e4a9b7f182fde5"
+  sha256 "3cec94054520f7970e92395a60e7913e8f942639b9917244d509c9533d37ba2d"
 
   url "https://github.com/ramanbanka/ferry-releases/releases/download/v#{version}/ferry-#{version}-macos-arm64.tar.gz"
   name "Ferry"
