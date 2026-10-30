@@ -22,7 +22,7 @@ cask "ferry" do
 
   url "https://github.com/ramanbanka/ferry-releases/releases/download/v#{version}/ferry-#{version}-macos-arm64.tar.gz"
   name "Ferry"
-  desc "Browse your Android phone in Finder over USB"
+  desc "Browse your Android phone in Finder, over USB or Wi-Fi"
   homepage "https://github.com/ramanbanka/ferry-releases"
 
   # Only arm64 builds are published today. An Intel cask would need a second
@@ -82,7 +82,9 @@ cask "ferry" do
 
   zap trash: [
     "~/Library/LaunchAgents/com.ferry.agent.plist",
+    "~/Library/Application Support/Ferry",
     "~/Library/Logs/ferry.log",
+    "~/Library/Logs/ferry.log.1",
   ]
 
   caveats <<~EOS
@@ -93,9 +95,12 @@ cask "ferry" do
       Settings > Developer options > USB debugging > ON
     Then plug it in, unlock it, and accept the "Allow USB debugging?" prompt.
 
-    Your phone then appears in Finder under ~/Ferry/<PhoneModel>.
+    Your phone then appears in Finder, and under ~/Ferry/<phone name>.
+
+    To use it over Wi-Fi with no cable, run `ferry pair` once.
 
       ferry status      # agent, mounts, connected phones
+      ferry pair        # set a phone up for Wi-Fi
       ferry stop        # stop until your next login
       ferry disable     # stop, and keep it from starting at login
 
