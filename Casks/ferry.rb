@@ -28,7 +28,6 @@ cask "ferry" do
   # Only arm64 builds are published today. An Intel cask would need a second
   # tarball and a sha256 per architecture.
   depends_on arch: :arm64
-  depends_on macos: :big_sur
   # A cask CAN depend on another cask — this is why Ferry ships as a cask rather
   # than a formula. adb (android-platform-tools) is a cask, and formulae are not
   # allowed to depend on casks, which previously left users to install it by hand.
@@ -37,7 +36,21 @@ cask "ferry" do
   # falls back to osascript, whose banners are attributed to "Script Editor" and
   # whose button opens Script Editor instead of your files.
   depends_on formula: "terminal-notifier"
+  depends_on :macos
 
+  # Register the background agent so phones mount automatically: `brew install --cask
+  # ferry` is the only command a user needs to run. `enable` also stops an older agent
+  # first, which is what makes an upgrade switch to the new version.
+  #
+  # An installer script, not `postflight_steps`: steps run in Homebrew's sandbox, where
+  # launchd and `open` both refuse to start anything, so Ferry installed but never ran.
+  # Installer scripts run outside it (see "Cask artifact trust and sandboxing" in the
+  # Cask Cookbook). It runs before the binary is linked, so it uses the staged copy;
+  # every upgrade runs `disable` then this again, which points launchd at the new one.
+  installer script: {
+    executable: "ferry-#{version}-macos-arm64/ferry",
+    args:       ["enable"],
+  }
   # The tarball unpacks to a versioned directory; point at the binary inside it.
   binary "ferry-#{version}-macos-arm64/ferry"
 
@@ -46,64 +59,41 @@ cask "ferry" do
   # macOS refuses to execute a quarantined program that is not signed with an Apple
   # Developer ID, and kills it outright — no dialog, just SIGKILL. Homebrew does not
   # set the flag itself, but security software on managed Macs marks every newly
-  # written file, which killed the postflight command below and aborted the whole
-  # install. Clearing it here runs before the binary is linked or executed.
+  # written file, which killed the setup command below and aborted the whole install.
   #
   # Remove this once Ferry is signed and notarized; it will no longer be needed.
-  preflight do
-    system_command "/usr/bin/xattr",
-                   args:         ["-d", "com.apple.quarantine",
-                                  "#{staged_path}/ferry-#{version}-macos-arm64/ferry"],
-                   must_succeed: false
-  end
-
-  # Register the background agent so phones mount automatically. This is the whole
-  # point of shipping as a cask: `brew install --cask ferry` is the only command a
-  # user needs to run.
-  #
-  # `enable` registers Ferry with launchd and starts it, which is the whole setup.
-  postflight do
-    system_command "#{HOMEBREW_PREFIX}/bin/ferry",
-                   args:         ["enable"],
-                   print_stdout: true
+  preflight_steps do
+    run "/usr/bin/xattr",
+        args:         ["-d", "com.apple.quarantine", "ferry-#{version}-macos-arm64/ferry"],
+        chdir:        ".",
+        must_succeed: false,
+        print_stderr: false
   end
 
   # Stop and deregister the agent before the binary disappears, otherwise launchd
   # keeps trying to run a path that no longer exists and mounts are left behind.
-  #
-  # This runs the binary that is currently installed, which during an upgrade is the
-  # older one — so a version whose CLI predates `disable` cannot be upgraded through
-  # the cask and must be uninstalled first.
-  uninstall_preflight do
-    system_command "#{HOMEBREW_PREFIX}/bin/ferry",
-                   args:         ["disable"],
-                   must_succeed: false
-  end
+  uninstall script: {
+    executable:   "#{HOMEBREW_PREFIX}/bin/ferry",
+    args:         ["disable"],
+    must_succeed: false,
+  }
 
   zap trash: [
-    "~/Library/LaunchAgents/com.ferry.agent.plist",
     "~/Library/Application Support/Ferry",
+    "~/Library/LaunchAgents/com.ferry.agent.plist",
     "~/Library/Logs/ferry.log",
     "~/Library/Logs/ferry.log.1",
   ]
 
   caveats <<~EOS
-    Ferry is set up and will mount phones automatically.
-
-    One thing you must do on the phone, once:
+    On the phone, once:
       Settings > About phone > tap "Build number" 7 times
       Settings > Developer options > USB debugging > ON
-    Then plug it in, unlock it, and accept the "Allow USB debugging?" prompt.
 
-    Your phone then appears in Finder, and under ~/Ferry/<phone name>.
+    Then plug it in, unlock it, and tap "Allow" on "Allow USB debugging?".
 
-    To use it over Wi-Fi with no cable, run `ferry pair` once.
+    For Wi-Fi, also turn on Wireless debugging in Developer options.
 
-      ferry status      # agent, mounts, connected phones
-      ferry pair        # set a phone up for Wi-Fi
-      ferry stop        # stop until your next login
-      ferry disable     # stop, and keep it from starting at login
-
-    Logs: ~/Library/Logs/ferry.log
+    To check on it: ferry status
   EOS
 end
